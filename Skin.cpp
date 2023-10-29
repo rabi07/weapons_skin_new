@@ -319,15 +319,18 @@ CON_COMMAND_F(giveknife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
 	}
 
 	CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
+	CBasePlayerWeapon* pPlayerWeapon = pWeaponServices->m_hActiveWeapon();
 
 	int64_t steamid = pPlayerController->m_steamID();
 
 	if (strcmp(args.Arg(1), "m9") == 0)
 	{
+		pWeaponServices->RemoveWeapon(pPlayerWeapon);
 		FnGiveNamedItem(pPlayerPawn->m_pItemServices(), "weapon_knife_m9", nullptr, nullptr, nullptr, nullptr);
 	}
 	else if (strcmp(args.Arg(1), "karambit") == 0)
 	{
+		pWeaponServices->RemoveWeapon(pPlayerWeapon);
 		FnGiveNamedItem(pPlayerPawn->m_pItemServices(), "weapon_knife_karambit", nullptr, nullptr, nullptr, nullptr);
 	}
 	else
