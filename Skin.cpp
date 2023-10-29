@@ -11,7 +11,6 @@
 #include "sdk/CCSPlayerController.h"
 #include "sdk/CCSPlayer_ItemServices.h"
 #include "sdk/CSmokeGrenadeProjectile.h"
-#include "engine.h"
 #include <map>
 #ifdef _WIN32
 #include <Windows.h>
