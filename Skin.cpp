@@ -11,6 +11,7 @@
 #include "sdk/CCSPlayerController.h"
 #include "sdk/CCSPlayer_ItemServices.h"
 #include "sdk/CSmokeGrenadeProjectile.h"
+#include <metamod/engine.h>
 #include <map>
 #ifdef _WIN32
 #include <Windows.h>
@@ -256,6 +257,14 @@ void CEntityListener::OnEntitySpawned(CEntityInstance* pEntity)
 	});
 }
 
+edict_t* GetEdict(CBaseEntity* pEntity)
+{
+    if (!pEntity)
+        return nullptr;
+
+    return pEntity->edict();
+}
+
 CON_COMMAND_F(skin, "修改皮肤", FCVAR_CLIENT_CAN_EXECUTE)
 {
     if (context.GetPlayerSlot() == -1) return;
@@ -311,7 +320,8 @@ CON_COMMAND_F(dlore, "修改皮肤", FCVAR_CLIENT_CAN_EXECUTE)
 
     char command[64];
     sprintf(command, "skin 1228");
-    pPlayerController->ClientCommand(command);
+    edict_t* pEdict = pPlayerController->GetEdict();
+	ClientCommand(pEdict, command);
 }
 
 const char* Skin::GetLicense()
