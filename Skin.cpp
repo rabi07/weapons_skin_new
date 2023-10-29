@@ -311,6 +311,7 @@ edict_t* GetEdict(CBaseEntity* pEntity)
     if (!pEntity)
         return nullptr;
 
+
     return pEntity->edict();
 }
 
