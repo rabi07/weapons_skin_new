@@ -257,42 +257,49 @@ void CEntityListener::OnEntitySpawned(CEntityInstance* pEntity)
 
 CON_COMMAND_F(skin, "修改皮肤", FCVAR_CLIENT_CAN_EXECUTE)
 {
-	if(context.GetPlayerSlot() == -1)return;
-	CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
-	CCSPlayerPawnBase* pPlayerPawn = pPlayerController->m_hPlayerPawn();
-	if (!pPlayerPawn || pPlayerPawn->m_lifeState() != LIFE_ALIVE)
-		return;
-	char buf[255] = {0};
-	if(args.ArgC() != 4)
-	{
-		sprintf(buf, " \x04 %s 你使用skin命令修改皮肤需要三个参数!",pPlayerController->m_iszPlayerName());
-		FnUTIL_ClientPrintAll(3, buf,nullptr, nullptr, nullptr, nullptr);
-		return;
-	}
+    if (context.GetPlayerSlot() == -1) return;
+    CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
+    CCSPlayerPawnBase* pPlayerPawn = pPlayerController->m_hPlayerPawn();
+    if (!pPlayerPawn || pPlayerPawn->m_lifeState() != LIFE_ALIVE)
+        return;
+    char buf[255] = { 0 };
+    if (args.ArgC() != 2 && args.ArgC() != 4)
+    {
+        sprintf(buf, " \x04 %s You need one or three parameters to modify the skin using the skin command!", pPlayerController->m_iszPlayerName());
+        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+        return;
+    }
 
-	CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
+    CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
 
-	int64_t steamid = pPlayerController->m_steamID();
-	int64_t weaponId = pWeaponServices->m_hActiveWeapon()->m_AttributeManager().m_Item().m_iItemDefinitionIndex();
-	
-	auto weapon_name = g_WeaponsMap.find(weaponId);
-	if(weapon_name == g_WeaponsMap.end())return;
+    int64_t steamid = pPlayerController->m_steamID();
+    int64_t weaponId = pWeaponServices->m_hActiveWeapon()->m_AttributeManager().m_Item().m_iItemDefinitionIndex();
 
-	g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit = atoi(args.Arg(1));
-	g_PlayerSkins[steamid][weaponId].m_nFallbackSeed = atoi(args.Arg(2));
-	g_PlayerSkins[steamid][weaponId].m_flFallbackWear = atof(args.Arg(3));
-	CBasePlayerWeapon* pPlayerWeapon = pWeaponServices->m_hActiveWeapon();
+    auto weapon_name = g_WeaponsMap.find(weaponId);
+    if (weapon_name == g_WeaponsMap.end()) return;
 
-	pWeaponServices->RemoveWeapon(pPlayerWeapon);
-	FnEntityRemove(g_pGameEntitySystem,pPlayerWeapon,nullptr,-1);
-	FnGiveNamedItem(pPlayerPawn->m_pItemServices(),weapon_name->second.c_str(),nullptr,nullptr,nullptr,nullptr);
-	pPlayerWeapon->m_AttributeManager().m_Item().m_iAccountID() = 271098320;
-	//CCSPlayer_ItemServices* pItemServices = static_cast<CCSPlayer_ItemServices*>(pPlayerPawn->m_pItemServices());
-	//pItemServices->GiveNamedItem(weapon_name->second.c_str());
-	// g_pGameRules->PlayerRespawn(static_cast<CCSPlayerPawn*>(pPlayerPawn));
-	META_CONPRINTF( "called by %lld\n", steamid);
-	sprintf(buf, " \x04 %s 已经成功修改皮肤 编号:%d 模板:%d 磨损:%f",pPlayerController->m_iszPlayerName(),g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit,g_PlayerSkins[steamid][weaponId].m_nFallbackSeed,g_PlayerSkins[steamid][weaponId].m_flFallbackWear);
-	FnUTIL_ClientPrintAll(3, buf,nullptr, nullptr, nullptr, nullptr);
+    g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit = atoi(args.Arg(1));
+    if (args.ArgC() == 4)
+    {
+        g_PlayerSkins[steamid][weaponId].m_nFallbackSeed = atoi(args.Arg(2));
+        g_PlayerSkins[steamid][weaponId].m_flFallbackWear = atof(args.Arg(3));
+    }
+    else
+    {
+        g_PlayerSkins[steamid][weaponId].m_nFallbackSeed = 0;
+        g_PlayerSkins[steamid][weaponId].m_flFallbackWear = 0.0f;
+    }
+
+    CBasePlayerWeapon* pPlayerWeapon = pWeaponServices->m_hActiveWeapon();
+
+    pWeaponServices->RemoveWeapon(pPlayerWeapon);
+    FnEntityRemove(g_pGameEntitySystem, pPlayerWeapon, nullptr, -1);
+    FnGiveNamedItem(pPlayerPawn->m_pItemServices(), weapon_name->second.c_str(), nullptr, nullptr, nullptr, nullptr);
+    pPlayerWeapon->m_AttributeManager().m_Item().m_iAccountID() = 271098320;
+
+    META_CONPRINTF("called by %lld\n", steamid);
+    sprintf(buf, " \x04 %s 已经成功修改皮肤 编号:%d 模板:%d 磨损:%f", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit, g_PlayerSkins[steamid][weaponId].m_nFallbackSeed, g_PlayerSkins[steamid][weaponId].m_flFallbackWear);
+    FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
 const char* Skin::GetLicense()
