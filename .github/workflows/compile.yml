@@ -23,13 +23,10 @@ jobs:
         # Compile on Linux & Windows.
         os: 
           - ubuntu-20.04
-          - windows-latest
 
         include:
           - os: ubuntu-20.04
             os_short: linux
-          - os: windows-latest
-            os_short: win
     steps:
       # Setup Python for AMBuild.
       - name: Setup Python 3.10
@@ -58,19 +55,6 @@ jobs:
           clang --version
           clang++ --version
 
-      - name: Find Visual C++ compilers and make all environment variables global (W)
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          :: See https://github.com/microsoft/vswhere/wiki/Find-VC
-          for /f "usebackq delims=*" %%i in (`vswhere -latest -property installationPath`) do (
-            call "%%i"\Common7\Tools\vsdevcmd.bat -arch=x64 -host_arch=x64
-          )
-
-          :: Loop over all environment variables and make them global.
-          for /f "delims== tokens=1,2" %%a in ('set') do (
-            echo>>"%GITHUB_ENV%" %%a=%%b
-          )
 
       # Checkout repos
       - name: Checkout
@@ -119,7 +103,6 @@ jobs:
       - name: Package
         run: |
           7z a -mx9 linux.zip ./Linux/*
-          7z a -mx9 windows.zip ./Windows/*
       - name: Release
         uses: svenstaro/upload-release-action@v2
         with:
