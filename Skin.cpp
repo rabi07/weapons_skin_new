@@ -323,8 +323,19 @@ CON_COMMAND_F(giveknife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
 
     int64_t steamid = pPlayerController->m_steamID();
 
-    // Remove the player's current weapon
+    // Check if the player is holding a knife
+    bool bHoldingKnife = false;
     if (pPlayerWeapon)
+    {
+        const char* weaponClassname = pPlayerWeapon->GetClassname();
+        if (strcmp(weaponClassname, "weapon_knife") == 0)
+        {
+            bHoldingKnife = true;
+        }
+    }
+
+    // Remove the player's current weapon if they are not holding a knife
+    if (!bHoldingKnife && pPlayerWeapon)
     {
         pWeaponServices->RemoveWeapon(pPlayerWeapon);
         FnEntityRemove(g_pGameEntitySystem, pPlayerWeapon, nullptr, -1);
