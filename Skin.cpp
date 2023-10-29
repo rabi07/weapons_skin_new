@@ -20,7 +20,6 @@
 #include "utils/module.h"
 #endif
 #include <string>
-#include
 
 Skin g_Skin;
 PLUGIN_EXPOSE(Skin, g_Skin);
