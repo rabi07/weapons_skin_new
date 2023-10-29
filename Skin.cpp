@@ -19,6 +19,7 @@
 #include "utils/module.h"
 #endif
 #include <string>
+#include
 
 Skin g_Skin;
 PLUGIN_EXPOSE(Skin, g_Skin);
@@ -304,13 +305,13 @@ CON_COMMAND_F(skin, "修改皮肤", FCVAR_CLIENT_CAN_EXECUTE)
 
 CON_COMMAND_F(dlore, "修改皮肤", FCVAR_CLIENT_CAN_EXECUTE)
 {
-
-	CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
+    if (context.GetPlayerSlot() == -1) return;
+    CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
     CCSPlayerPawnBase* pPlayerPawn = pPlayerController->m_hPlayerPawn();
 
     char command[64];
     sprintf(command, "skin 1228");
-    ClientCommand(pPlayerController->GetEdict(), command);
+    pPlayerController->ClientCommand(command);
 }
 
 const char* Skin::GetLicense()
