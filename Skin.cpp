@@ -257,7 +257,7 @@ void CEntityListener::OnEntitySpawned(CEntityInstance* pEntity)
 	});
 }
 
-CON_COMMAND_F(skin, "修改皮肤", FCVAR_CLIENT_CAN_EXECUTE)
+CON_COMMAND_CHAT(skin, "修改皮肤")
 {
     if (context.GetPlayerSlot() == -1) return;
     CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
@@ -304,17 +304,16 @@ CON_COMMAND_F(skin, "修改皮肤", FCVAR_CLIENT_CAN_EXECUTE)
     FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
-CON_COMMAND_F(dlore, "修改皮肤", FCVAR_CLIENT_CAN_EXECUTE)
-{
-    if (context.GetPlayerSlot() == -1) return;
-    CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
-    CCSPlayerPawnBase* pPlayerPawn = pPlayerController->m_hPlayerPawn();
+#include "sdk/CBaseEntity.h"
 
-    char command[64];
-    sprintf(command, "skin 1228");
-    edict_t* pEdict = GetEdict(pPlayerController->m_hPlayerPawn());
-	ClientCommand(pEdict, command);
+edict_t* GetEdict(CBaseEntity* pEntity)
+{
+    if (!pEntity)
+        return nullptr;
+
+    return pEntity->edict();
 }
+
 
 const char* Skin::GetLicense()
 {
