@@ -257,7 +257,7 @@ void CEntityListener::OnEntitySpawned(CEntityInstance* pEntity)
 	});
 }
 
-CON_COMMAND_CHAT(skin, "修改皮肤")
+CON_COMMAND_F(skin, "修改皮肤", FCVAR_CLIENT_CAN_EXECUTE)
 {
     if (context.GetPlayerSlot() == -1) return;
     CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
@@ -304,16 +304,46 @@ CON_COMMAND_CHAT(skin, "修改皮肤")
     FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
+CON_COMMAND_F(giveknife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
+{
+	if (context.GetPlayerSlot() == -1) return;
+	CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
+	CCSPlayerPawnBase* pPlayerPawn = pPlayerController->m_hPlayerPawn();
+	if (!pPlayerPawn || pPlayerPawn->m_lifeState() != LIFE_ALIVE)
+		return;
+	char buf[255] = { 0 };
+	if (args.ArgC() != 2)
+	{
+		sprintf(buf, " \x04 %s You need to specify a knife type (m9 or karambit) to use the giveknife command!", pPlayerController->m_iszPlayerName());
+		FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+		return;
+	}
+
+	CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
+
+	int64_t steamid = pPlayerController->m_steamID();
+
+	if (strcmp(args.Arg(1), "m9") == 0)
+	{
+		FnGiveNamedItem(pPlayerPawn->m_pItemServices(), "weapon_knife_m9", nullptr, nullptr, nullptr, nullptr);
+	}
+	else if (strcmp(args.Arg(1), "karambit") == 0)
+	{
+		FnGiveNamedItem(pPlayerPawn->m_pItemServices(), "weapon_knife_karambit", nullptr, nullptr, nullptr, nullptr);
+	}
+	else
+	{
+		sprintf(buf, " \x04 %s Invalid knife type specified! Only m9 and karambit are supported.", pPlayerController->m_iszPlayerName());
+		FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+		return;
+	}
+
+	sprintf(buf, " \x04 %s has been given a %s knife!", pPlayerController->m_iszPlayerName(), args.Arg(1));
+	FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+}
+
 #include "sdk/CBaseEntity.h"
 
-edict_t* GetEdict(CBaseEntity* pEntity)
-{
-    if (!pEntity)
-        return nullptr;
-
-
-    return pEntity->edict();
-}
 
 
 const char* Skin::GetLicense()
