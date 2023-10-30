@@ -45,7 +45,6 @@ typedef struct SkinParm
 typedef void*(FASTCALL* EntityRemove_t)(CGameEntitySystem*, void*, void*,uint64_t);
 typedef void(FASTCALL* GiveNamedItem_t)(void* itemService,const char* pchName, void* iSubType,void* pScriptItem, void* a5,void* a6);
 typedef void(FASTCALL* UTIL_ClientPrintAll_t)(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4);
-typedef void(FASTCALL *ClientPrint)(CBasePlayerController *player, int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4);
 
 extern EntityRemove_t FnEntityRemove;
 extern GiveNamedItem_t FnGiveNamedItem;
@@ -53,11 +52,9 @@ extern UTIL_ClientPrintAll_t FnUTIL_ClientPrintAll;
 extern ClientPrint FnUTIL_ClientPrint;
 EntityRemove_t FnEntityRemove;
 GiveNamedItem_t FnGiveNamedItem;
-ClientPrint FnUTIL_ClientPrint;
 #else
 void (*FnEntityRemove)(CGameEntitySystem*, void*, void*,uint64_t) = nullptr;
 void (*FnGiveNamedItem)(void* itemService,const char* pchName, void* iSubType,void* pScriptItem, void* a5,void* a6) = nullptr;
-void (*FnUTIL_ClientPrint)(int, const char*, const char*, const char*, const char*, const char*) = nullptr;
 void (*FnUTIL_ClientPrintAll)(int, const char*, const char*, const char*, const char*, const char*, const char*) = nullptr;
 #endif
 
@@ -270,7 +267,7 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
     if (args.ArgC() != 2 && args.ArgC() != 4)
     {
         sprintf(buf, " \x04 %s Trebuie sa specifici ID-ul skinului!", pPlayerController->m_iszPlayerName());
-        FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr);
+        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
@@ -298,8 +295,6 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
 
     pWeaponServices->RemoveWeapon(pPlayerWeapon);
 
-    sprintf(buf, " \x04 %s Si-a ales skinul cu ID-ul: %d cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
-    FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr);
 
     pPlayerWeapon->m_nFallbackPaintKit() = g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit;
     pPlayerWeapon->m_nFallbackSeed() = g_PlayerSkins[steamid][weaponId].m_nFallbackSeed;
@@ -320,7 +315,7 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     if (args.ArgC() != 2)
     {
         sprintf(buf, " \7[1TAP]\1  \x04 Nume de cutit incorect \n Nume acceptate: Nume acceptate: karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
-        FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr);
+        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
@@ -420,12 +415,9 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     else
     {
         sprintf(buf, " \7[1TAP]\1  \x04 Nume de cutit incorect\n Nume acceptate: Nume acceptate: karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
-        FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr);
+        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
-
-sprintf(buf, " \7[1TAP]\1  \x04 %s has been given a %s knife!", pPlayerController->m_iszPlayerName(), args.Arg(1));
-FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
 const char* Skin::GetLicense()
