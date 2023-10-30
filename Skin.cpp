@@ -298,7 +298,7 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
     pPlayerWeapon->m_AttributeManager().m_Item().m_iAccountID() = 271098320;
 
     META_CONPRINTF("called by %lld\n", steamid);
-    sprintf(buf, " \x04 %s Si-a ales skinul cu ID-ul: %d cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
+    sprintf(buf, " \7[1TAP]\1  \x04 %s Si-a ales skinul cu ID-ul: %d cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
     FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
@@ -312,7 +312,7 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     char buf[255] = { 0 };
     if (args.ArgC() != 2)
     {
-        sprintf(buf, " \x04 Nume de cutit incorect\n Nume acceptate: Nume acceptate: karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
+        sprintf(buf, " \7[1TAP]\1  \x04 Nume de cutit incorect \n Nume acceptate: Nume acceptate: karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
         FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
@@ -412,12 +412,12 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     }
     else
     {
-        sprintf(buf, " \x04 Nume de cutit incorect\n Nume acceptate: Nume acceptate: karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
+        sprintf(buf, " \7[1TAP]\1  \x04 Nume de cutit incorect\n Nume acceptate: Nume acceptate: karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
         FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
-    sprintf(buf, " \x04 %s has been given a %s knife!", pPlayerController->m_iszPlayerName(), args.Arg(1));
+    sprintf(buf, " \7[1TAP]\1  \x04 %s has been given a %s knife!", pPlayerController->m_iszPlayerName(), args.Arg(1));
     FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
