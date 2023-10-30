@@ -270,8 +270,20 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
     char buf[255] = { 0 };
     if (args.ArgC() != 2 && args.ArgC() != 4)
     {
-        sprintf(buf, " \x04 %s Trebuie sa specifici ID-ul skinului!", pPlayerController->m_iszPlayerName());
-        FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+		sprintf(buf, "-------------------------------------------------");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02 [1TAP] \x01 Foloseste comanda \x06skin <skin_id> \x01in CONSOLA!");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02[1TAP] ★ \x01 Pentru a gasi \x06skin_id \x01poti folosi site-ul \x06csgostash.com !");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02 [1TAP] \x01 Mai multe detalii pe \x06discord.gg/1tap!");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, "-------------------------------------------------");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
@@ -318,11 +330,20 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     if (args.ArgC() != 2)
     {
 
-		sprintf(buf, " \x02 [1TAP] \x01Foloseste comanda \x06knife <name> \x01in CONSOLA!");
+		sprintf(buf, "-------------------------------------------------");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02 [1TAP] \x01 Foloseste comanda \x06knife <name> \x01in CONSOLA!");
 		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 
 		sprintf(buf, " \x02[1TAP] ★ \x01Variantele de nume acceptate sunt \x06karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
-		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);;
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02 [1TAP] \x01 Mai multe detalii pe \x06discord.gg/1tap!");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, "-------------------------------------------------");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
