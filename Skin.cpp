@@ -45,17 +45,21 @@ typedef struct SkinParm
 typedef void*(FASTCALL* EntityRemove_t)(CGameEntitySystem*, void*, void*,uint64_t);
 typedef void(FASTCALL* GiveNamedItem_t)(void* itemService,const char* pchName, void* iSubType,void* pScriptItem, void* a5,void* a6);
 typedef void(FASTCALL* UTIL_ClientPrintAll_t)(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4);
+typedef void(FASTCALL *ClientPrint)(CBasePlayerController *player, int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4);
 
 extern EntityRemove_t FnEntityRemove;
 extern GiveNamedItem_t FnGiveNamedItem;
 extern UTIL_ClientPrintAll_t FnUTIL_ClientPrintAll;
+extern ClientPrint_t FnUTIL_ClientPrint;
 EntityRemove_t FnEntityRemove;
 GiveNamedItem_t FnGiveNamedItem;
 UTIL_ClientPrintAll_t FnUTIL_ClientPrintAll;
+ClientPrint_t FnUTIL_ClientPrint;
 #else
 void (*FnEntityRemove)(CGameEntitySystem*, void*, void*,uint64_t) = nullptr;
 void (*FnGiveNamedItem)(void* itemService,const char* pchName, void* iSubType,void* pScriptItem, void* a5,void* a6) = nullptr;
 void (*FnUTIL_ClientPrintAll)(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) = nullptr;
+void(*FnUTIL_ClientPrint)(CBasePlayerController *player, int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4);
 #endif
 
 std::map<int, std::string> g_WeaponsMap;
@@ -176,6 +180,7 @@ void Skin::StartupServer(const GameSessionConfiguration_t& config, ISource2World
 	#else
 	CModule libserver(g_pSource2Server);
 	FnUTIL_ClientPrintAll = libserver.FindPatternSIMD("55 48 89 E5 41 57 49 89 D7 41 56 49 89 F6 41 55 41 89 FD").RCast< decltype(FnUTIL_ClientPrintAll) >();
+	FnUTIL_ClientPrint = libserver.FindPatternSIMD("55 48 89 E5 41 57 49 89 CF 41 56 49 89 D6 41 55 41 89 F5 41 54 4C 8D A5 A0 FE FF FF").RCast<decltype(FnUTIL_ClientPrint)>();
 	FnGiveNamedItem = libserver.FindPatternSIMD("55 48 89 E5 41 57 41 56 49 89 CE 41 55 49 89 F5 41 54 49 89 D4 53 48 89").RCast<decltype(FnGiveNamedItem)>();
 	FnEntityRemove = libserver.FindPatternSIMD("48 85 F6 74 0B 48 8B 76 10 E9 B2 FE FF FF").RCast<decltype(FnEntityRemove)>();
 	#endif
@@ -266,7 +271,7 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
     if (args.ArgC() != 2 && args.ArgC() != 4)
     {
         sprintf(buf, " \x04 %s Trebuie sa specifici ID-ul skinului!", pPlayerController->m_iszPlayerName());
-        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+        FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
@@ -299,7 +304,7 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
 
     META_CONPRINTF("called by %lld\n", steamid);
     sprintf(buf, " \7[1TAP]\1  \x04 %s Si-a ales skinul cu ID-ul: %d cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
-    FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+    FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
 CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
@@ -313,21 +318,24 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     if (args.ArgC() != 2)
     {
         sprintf(buf, " \x04 %s You need to specify a knife type to use the giveknife command!", pPlayerController->m_iszPlayerName());
-        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+        FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
     CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
     // Get the weapon currently in the player's hand
-CBasePlayerWeapon* pCurrentWeapon = pWeaponServices->m_hActiveWeapon();
+	CBasePlayerWeapon* pCurrentWeapon = pWeaponServices->m_hActiveWeapon();
 
-// Check if the player is currently holding a knife
-if (pCurrentWeapon && strstr(pCurrentWeapon->GetClassname(), "weapon_knife") != nullptr)
-{
-    // Remove the player's current knife
-    pWeaponServices->RemoveWeapon(pCurrentWeapon);
-    FnEntityRemove(g_pGameEntitySystem, pCurrentWeapon, nullptr, -1);
-}
+	// Check if the player is currently holding a knife
+	// Check if the player is currently holding a knife
+	if (pCurrentWeapon && strstr(pCurrentWeapon->GetClassname(), "weapon_knife") != nullptr)
+	{
+		// Remove the player's current knife
+		pWeaponServices->RemoveWeapon(pCurrentWeapon);
+
+		// Delete the knife entity
+		FnEntityRemove(g_pGameEntitySystem, pCurrentWeapon, nullptr, -1);
+	}
 
     // Give the player the knife
     if (strcmp(args.Arg(1), "m9") == 0)
@@ -413,12 +421,12 @@ if (pCurrentWeapon && strstr(pCurrentWeapon->GetClassname(), "weapon_knife") != 
     else
     {
         sprintf(buf, " \x04 %s Invalid knife type specified!", pPlayerController->m_iszPlayerName());
-        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+        FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
     sprintf(buf, " \x04 %s has been given a %s knife!", pPlayerController->m_iszPlayerName(), args.Arg(1));
-    FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+    FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
 const char* Skin::GetLicense()
