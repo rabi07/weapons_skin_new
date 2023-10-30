@@ -57,8 +57,8 @@ ClientPrint FnUTIL_ClientPrint;
 #else
 void (*FnEntityRemove)(CGameEntitySystem*, void*, void*,uint64_t) = nullptr;
 void (*FnGiveNamedItem)(void* itemService,const char* pchName, void* iSubType,void* pScriptItem, void* a5,void* a6) = nullptr;
-void (*FnUTIL_ClientPrintAll)(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) = nullptr;
-void(*FnUTIL_ClientPrint)(CBasePlayerController *player, int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4);
+void (*FnUTIL_ClientPrint)(int, const char*, const char*, const char*, const char*, const char*) = nullptr;
+void (*FnUTIL_ClientPrintAll)(int, const char*, const char*, const char*, const char*, const char*, const char*) = nullptr;
 #endif
 
 std::map<int, std::string> g_WeaponsMap;
@@ -298,7 +298,7 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
 
     pWeaponServices->RemoveWeapon(pPlayerWeapon);
 
-    sprintf(buf, " \x04 %s Si-a ales skinul cu ID-ul: %s cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
+    sprintf(buf, " \x04 %s Si-a ales skinul cu ID-ul: %d cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
     FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 
     pPlayerWeapon->m_nFallbackPaintKit() = g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit;
