@@ -255,44 +255,51 @@ void CEntityListener::OnEntitySpawned(CEntityInstance* pEntity)
 	});
 }
 
-CON_COMMAND_F(skin, "Change Skin", FCVAR_CLIENT_CAN_EXECUTE)
+CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
 {
-	if(context.GetPlayerSlot() == -1)return;
-	CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
-	CCSPlayerPawnBase* pPlayerPawn = pPlayerController->m_hPlayerPawn();
-	if (!pPlayerPawn || pPlayerPawn->m_lifeState() != LIFE_ALIVE)
-		return;
-	char buf[255] = {0};
-	if(args.ArgC() != 4)
-	{
-		sprintf(buf, " \x04 %s Ai nevoie de 3 parametrii pentru a schimba skinul!",pPlayerController->m_iszPlayerName());
-		FnUTIL_ClientPrintAll(3, buf,nullptr, nullptr, nullptr, nullptr);
-		return;
-	}
+    if (context.GetPlayerSlot() == -1) return;
+    CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
+    CCSPlayerPawnBase* pPlayerPawn = pPlayerController->m_hPlayerPawn();
+    if (!pPlayerPawn || pPlayerPawn->m_lifeState() != LIFE_ALIVE)
+        return;
+    char buf[255] = { 0 };
+    if (args.ArgC() != 2 && args.ArgC() != 4)
+    {
+        sprintf(buf, " \x04 %s Trebuie sa specifici ID-ul skinului!", pPlayerController->m_iszPlayerName());
+        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+        return;
+    }
 
-	CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
+    CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
 
-	int64_t steamid = pPlayerController->m_steamID();
-	int64_t weaponId = pWeaponServices->m_hActiveWeapon()->m_AttributeManager().m_Item().m_iItemDefinitionIndex();
-	
-	auto weapon_name = g_WeaponsMap.find(weaponId);
-	if(weapon_name == g_WeaponsMap.end())return;
+    int64_t steamid = pPlayerController->m_steamID();
+    int64_t weaponId = pWeaponServices->m_hActiveWeapon()->m_AttributeManager().m_Item().m_iItemDefinitionIndex();
 
-	g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit = atoi(args.Arg(1));
-	g_PlayerSkins[steamid][weaponId].m_nFallbackSeed = atoi(args.Arg(2));
-	g_PlayerSkins[steamid][weaponId].m_flFallbackWear = atof(args.Arg(3));
-	CBasePlayerWeapon* pPlayerWeapon = pWeaponServices->m_hActiveWeapon();
+    auto weapon_name = g_WeaponsMap.find(weaponId);
+    if (weapon_name == g_WeaponsMap.end()) return;
 
-	pWeaponServices->RemoveWeapon(pPlayerWeapon);
-	FnEntityRemove(g_pGameEntitySystem,pPlayerWeapon,nullptr,-1);
-	FnGiveNamedItem(pPlayerPawn->m_pItemServices(),weapon_name->second.c_str(),nullptr,nullptr,nullptr,nullptr);
-	pPlayerWeapon->m_AttributeManager().m_Item().m_iAccountID() = 271098320;
-	CCSPlayer_ItemServices* pItemServices = static_cast<CCSPlayer_ItemServices*>(pPlayerPawn->m_pItemServices());
-	pItemServices->GiveNamedItem(weapon_name->second.c_str());
-	g_pGameRules->PlayerRespawn(static_cast<CCSPlayerPawn*>(pPlayerPawn));
-	META_CONPRINTF( "called by %lld\n", steamid);
-	sprintf(buf, " \x04 %s Ai ales:%d pattern:%d wear:%f",pPlayerController->m_iszPlayerName(),g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit,g_PlayerSkins[steamid][weaponId].m_nFallbackSeed,g_PlayerSkins[steamid][weaponId].m_flFallbackWear);
-	FnUTIL_ClientPrintAll(3, buf,nullptr, nullptr, nullptr, nullptr);
+    g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit = atoi(args.Arg(1));
+    if (args.ArgC() == 4)
+    {
+        g_PlayerSkins[steamid][weaponId].m_nFallbackSeed = atoi(args.Arg(2));
+        g_PlayerSkins[steamid][weaponId].m_flFallbackWear = atof(args.Arg(3));
+    }
+    else
+    {
+        g_PlayerSkins[steamid][weaponId].m_nFallbackSeed = 0;
+        g_PlayerSkins[steamid][weaponId].m_flFallbackWear = 0.0f;
+    }
+
+    CBasePlayerWeapon* pPlayerWeapon = pWeaponServices->m_hActiveWeapon();
+
+    pWeaponServices->RemoveWeapon(pPlayerWeapon);
+    FnEntityRemove(g_pGameEntitySystem, pPlayerWeapon, nullptr, -1);
+    FnGiveNamedItem(pPlayerPawn->m_pItemServices(), weapon_name->second.c_str(), nullptr, nullptr, nullptr, nullptr);
+    pPlayerWeapon->m_AttributeManager().m_Item().m_iAccountID() = 271098320;
+
+    META_CONPRINTF("called by %lld\n", steamid);
+    sprintf(buf, " \x04 %s Si-a ales skinul cu ID-ul: %s cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
+    FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
 CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
@@ -305,7 +312,7 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     char buf[255] = { 0 };
     if (args.ArgC() != 2)
     {
-        sprintf(buf, " \x04 %s You need to specify a knife type (m9 or karambit) to use the giveknife command!", pPlayerController->m_iszPlayerName());
+        sprintf(buf, " \x04 Nume de cutit incorect\n Nume acceptate: Nume acceptate: karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
         FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
@@ -405,7 +412,7 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     }
     else
     {
-        sprintf(buf, " \x04 %s Invalid knife type specified!", pPlayerController->m_iszPlayerName());
+        sprintf(buf, " \x04 Nume de cutit incorect\n Nume acceptate: Nume acceptate: karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
         FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
