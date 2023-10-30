@@ -255,6 +255,52 @@ void CEntityListener::OnEntitySpawned(CEntityInstance* pEntity)
 	});
 }
 
+CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
+{
+    if (context.GetPlayerSlot() == -1) return;
+    CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
+    CCSPlayerPawnBase* pPlayerPawn = pPlayerController->m_hPlayerPawn();
+    if (!pPlayerPawn || pPlayerPawn->m_lifeState() != LIFE_ALIVE)
+        return;
+    char buf[255] = { 0 };
+    if (args.ArgC() != 2 && args.ArgC() != 4)
+    {
+        sprintf(buf, " \x04 %s Trebuie sa specifici ID-ul skinului!", pPlayerController->m_iszPlayerName());
+        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+        return;
+    }
+
+    CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
+
+    int64_t steamid = pPlayerController->m_steamID();
+    int64_t weaponId = pWeaponServices->m_hActiveWeapon()->m_AttributeManager().m_Item().m_iItemDefinitionIndex();
+
+    auto weapon_name = g_WeaponsMap.find(weaponId);
+    if (weapon_name == g_WeaponsMap.end()) return;
+
+    g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit = atoi(args.Arg(1));
+    if (args.ArgC() == 4)
+    {
+        g_PlayerSkins[steamid][weaponId].m_nFallbackSeed = atoi(args.Arg(2));
+        g_PlayerSkins[steamid][weaponId].m_flFallbackWear = atof(args.Arg(3));
+    }
+    else
+    {
+        g_PlayerSkins[steamid][weaponId].m_nFallbackSeed = 0;
+        g_PlayerSkins[steamid][weaponId].m_flFallbackWear = 0.0f;
+    }
+
+    CBasePlayerWeapon* pPlayerWeapon = pWeaponServices->m_hActiveWeapon();
+
+    pWeaponServices->RemoveWeapon(pPlayerWeapon);
+    FnEntityRemove(g_pGameEntitySystem, pPlayerWeapon, nullptr, -1);
+    FnGiveNamedItem(pPlayerPawn->m_pItemServices(), weapon_name->second.c_str(), nullptr, nullptr, nullptr, nullptr);
+    pPlayerWeapon->m_AttributeManager().m_Item().m_iAccountID() = 271098320;
+
+    META_CONPRINTF("called by %lld\n", steamid);
+    sprintf(buf, " \7[1TAP]\1  \x04 %s Si-a ales skinul cu ID-ul: %d cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
+    FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+}
 
 CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
 {
@@ -272,16 +318,16 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     }
 
     CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
-    CBasePlayerWeapon* pPlayerWeapon = pWeaponServices->m_hActiveWeapon();
+    // Get the weapon currently in the player's hand
+CBasePlayerWeapon* pCurrentWeapon = pPlayerPawn->GetCurrentWeapon();
 
-    int64_t steamid = pPlayerController->m_steamID();
-
+// Check if the player is currently holding a knife
+if (pCurrentWeapon && strstr(pCurrentWeapon->GetClassname(), "weapon_knife") != nullptr)
+{
     // Remove the player's current knife
-    if (pPlayerWeapon && strstr(pPlayerWeapon->GetClassname(), "weapon_knife") != nullptr)
-    {
-        pWeaponServices->RemoveWeapon(pPlayerWeapon);
-        FnEntityRemove(g_pGameEntitySystem, pPlayerWeapon, nullptr, -1);
-    }
+    pWeaponServices->RemoveWeapon(pCurrentWeapon);
+    FnEntityRemove(g_pGameEntitySystem, pCurrentWeapon, nullptr, -1);
+}
 
     // Give the player the knife
     if (strcmp(args.Arg(1), "m9") == 0)
