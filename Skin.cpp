@@ -317,7 +317,7 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     char buf[255] = { 0 };
     if (args.ArgC() != 2)
     {
-        sprintf(buf, " \x04 %s You need to specify a knife type to use the giveknife command!", pPlayerController->m_iszPlayerName());
+        sprintf(buf, " \x02 [1TAP] \x01Foloseste comanda \x06knife <name> \x01in CONSOLA !\n \x02[1TAP] ★ \x01Variantele de nume acceptate sunt \x06karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
         FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
