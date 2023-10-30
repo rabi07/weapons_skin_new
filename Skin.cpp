@@ -319,7 +319,7 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
 
     CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
     // Get the weapon currently in the player's hand
-CBasePlayerWeapon* pCurrentWeapon = pPlayerPawn->GetCurrentWeapon();
+CBasePlayerWeapon* pCurrentWeapon = pWeaponServices->m_hActiveWeapon();
 
 // Check if the player is currently holding a knife
 if (pCurrentWeapon && strstr(pCurrentWeapon->GetClassname(), "weapon_knife") != nullptr)
