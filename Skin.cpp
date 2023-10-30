@@ -298,7 +298,7 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
     pPlayerWeapon->m_AttributeManager().m_Item().m_iAccountID() = 271098320;
 
     META_CONPRINTF("called by %lld\n", steamid);
-    sprintf(buf, " \x04 %s Si-a ales skinul cu ID-ul: %s cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
+    sprintf(buf, " \x04 %s Si-a ales skinul cu ID-ul: %d cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
     FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
