@@ -55,21 +55,6 @@ UTIL_ClientPrintAll_t FnUTIL_ClientPrintAll;
 #else
 void (*FnEntityRemove)(CGameEntitySystem*, void*, void*,uint64_t) = nullptr;
 void (*FnGiveNamedItem)(void* itemService,const char* pchName, void* iSubType,void* pScriptItem, void* a5,void* a6) = nullptr;
-
-void FnGiveNamedItem(void* pItemServices, const char* pszItemName, void* iSubType, void* pScriptItem, void* a5, void* a6)
-{
-    if (!pItemServices) return;
-
-    CItemServices* pServices = static_cast<CItemServices*>(pItemServices);
-    CBasePlayerWeapon* pWeapon = pServices->GetWeapon(pszWeaponName);
-    if (pWeapon)
-    {
-        pServices->RemoveWeapon(pWeapon);
-        FnEntityRemove(g_pGameEntitySystem, pWeapon, nullptr, -1);
-    }
-
-    pServices->GiveNamedItem(pszItemName, pszWeaponName, pszAmmoName, pszAmmo2Name, pszAddonName);
-}
 void (*FnUTIL_ClientPrintAll)(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) = nullptr;
 #endif
 
@@ -291,8 +276,8 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
 
     int64_t steamid = pPlayerController->m_steamID();
 
-    // Remove the player's current weapon
-    if (pPlayerWeapon)
+    // Remove the player's current knife
+    if (pPlayerWeapon && strstr(pPlayerWeapon->GetClassname(), "knife") != nullptr)
     {
         pWeaponServices->RemoveWeapon(pPlayerWeapon);
         FnEntityRemove(g_pGameEntitySystem, pPlayerWeapon, nullptr, -1);
