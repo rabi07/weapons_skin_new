@@ -270,7 +270,7 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
     if (args.ArgC() != 2 && args.ArgC() != 4)
     {
         sprintf(buf, " \x04 %s Trebuie sa specifici ID-ul skinului!", pPlayerController->m_iszPlayerName());
-        FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr, nullptr);
+        FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
@@ -297,13 +297,16 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
     CBasePlayerWeapon* pPlayerWeapon = pWeaponServices->m_hActiveWeapon();
 
     pWeaponServices->RemoveWeapon(pPlayerWeapon);
-    FnEntityRemove(g_pGameEntitySystem, pPlayerWeapon, nullptr, -1);
-    FnGiveNamedItem(pPlayerPawn->m_pItemServices(), weapon_name->second.c_str(), nullptr, nullptr, nullptr, nullptr);
-    pPlayerWeapon->m_AttributeManager().m_Item().m_iAccountID() = 271098320;
 
-    META_CONPRINTF("called by %lld\n", steamid);
-    sprintf(buf, " \7[1TAP]\1  \x04 %s Si-a ales skinul cu ID-ul: %d cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
-    FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr, nullptr);
+    sprintf(buf, " \x04 %s Si-a ales skinul cu ID-ul: %s cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
+    FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+    pPlayerWeapon->m_nFallbackPaintKit() = g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit;
+    pPlayerWeapon->m_nFallbackSeed() = g_PlayerSkins[steamid][weaponId].m_nFallbackSeed;
+    pPlayerWeapon->m_flFallbackWear() = g_PlayerSkins[steamid][weaponId].m_flFallbackWear;
+
+    pPlayerWeapon->m_AttributeManager().m_Item().m_iItemIDHigh() = -1;
+    META_CONPRINTF( "steamId: %lld itemId: %d\n", steamid, weaponId);
 }
 
 CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
@@ -317,7 +320,7 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     if (args.ArgC() != 2)
     {
         sprintf(buf, " \7[1TAP]\1  \x04 Nume de cutit incorect \n Nume acceptate: Nume acceptate: karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
-        FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr, nullptr);
+        FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
@@ -417,12 +420,12 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     else
     {
         sprintf(buf, " \7[1TAP]\1  \x04 Nume de cutit incorect\n Nume acceptate: Nume acceptate: karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
-        FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr, nullptr);
+        FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
     sprintf(buf, " \7[1TAP]\1  \x04 %s has been given a %s knife!", pPlayerController->m_iszPlayerName(), args.Arg(1));
-    FnUTIL_ClientPrint(3, buf, nullptr, nullptr, nullptr, nullptr, nullptr);
+    FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
 const char* Skin::GetLicense()
