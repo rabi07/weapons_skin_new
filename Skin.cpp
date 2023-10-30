@@ -53,7 +53,19 @@ EntityRemove_t FnEntityRemove;
 GiveNamedItem_t FnGiveNamedItem;
 UTIL_ClientPrintAll_t FnUTIL_ClientPrintAll;
 #else
-void (*FnEntityRemove)(CGameEntitySystem*, void*, void*,uint64_t) = nullptr;
+void FnGiveNamedItem(CItemServices* pItemServices, const char* pszItemName, const char* pszWeaponName, const char* pszAmmoName, const char* pszAmmo2Name, const char* pszAddonName)
+{
+    if (!pItemServices) return;
+
+    CBasePlayerWeapon* pWeapon = pItemServices->GetWeapon(pszWeaponName);
+    if (pWeapon)
+    {
+        pItemServices->RemoveWeapon(pWeapon);
+        FnEntityRemove(g_pGameEntitySystem, pWeapon, nullptr, -1);
+    }
+
+    pItemServices->GiveNamedItem(pszItemName, pszWeaponName, pszAmmoName, pszAmmo2Name, pszAddonName);
+}
 void (*FnGiveNamedItem)(void* itemService,const char* pchName, void* iSubType,void* pScriptItem, void* a5,void* a6) = nullptr;
 void (*FnUTIL_ClientPrintAll)(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) = nullptr;
 #endif
