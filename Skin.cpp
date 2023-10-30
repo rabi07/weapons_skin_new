@@ -277,7 +277,7 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     int64_t steamid = pPlayerController->m_steamID();
 
     // Remove the player's current knife
-    if (pPlayerWeapon && strstr(pPlayerWeapon->GetClassname(), "knife") != nullptr)
+    if (pPlayerWeapon && strstr(pPlayerWeapon->GetClassname(), "weapon_knife") != nullptr)
     {
         pWeaponServices->RemoveWeapon(pPlayerWeapon);
         FnEntityRemove(g_pGameEntitySystem, pPlayerWeapon, nullptr, -1);
