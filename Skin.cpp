@@ -54,6 +54,8 @@ GiveNamedItem_t FnGiveNamedItem;
 UTIL_ClientPrintAll_t FnUTIL_ClientPrintAll;
 #else
 void (*FnEntityRemove)(CGameEntitySystem*, void*, void*,uint64_t) = nullptr;
+void (*FnGiveNamedItem)(void* itemService,const char* pchName, void* iSubType,void* pScriptItem, void* a5,void* a6) = nullptr;
+
 void FnGiveNamedItem(CItemServices* pItemServices, const char* pszItemName, const char* pszWeaponName, const char* pszAmmoName, const char* pszAmmo2Name, const char* pszAddonName)
 {
     if (!pItemServices) return;
