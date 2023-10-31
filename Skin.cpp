@@ -273,13 +273,13 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
 		sprintf(buf, "-------------------------------------------------");
 		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 
-		sprintf(buf, " \x02 [1TAP] \x01 Foloseste comanda \x06skin <skin_id> \x01in CONSOLA!");
+		sprintf(buf, " \x02 [BroSena] \x01 Use command \x06 skin <skin_id> \x01 in CONSOLE!");
 		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 
-		sprintf(buf, " \x02[1TAP] \x01 Pentru a gasi \x06skin_id \x01poti folosi site-ul \x06 csgostash.com !");
+		sprintf(buf, " \x02 [BroSena] \x01 To find \x06 skin_id \x01 you can use the site \x06 csgostash.com !");
 		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 
-		sprintf(buf, " \x02 [1TAP] \x01 Mai multe detalii pe \x06 discord.gg/1tap!");
+		sprintf(buf, " \x02 [BroSena] \x01 More details on \x06 discord.com/invite/DQczE86!");
 		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 
 		sprintf(buf, "-------------------------------------------------");
@@ -315,7 +315,7 @@ CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
     pPlayerWeapon->m_AttributeManager().m_Item().m_iAccountID() = 271098320;
 
     META_CONPRINTF("called by %lld\n", steamid);
-    sprintf(buf, " \7[1TAP]\1  \x04 %s Si-a ales skinul cu ID-ul: %d cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
+    sprintf(buf, " \7 [BroSena] \1 \x04 %s Selected skin with ID: %d successfully!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
     FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
@@ -333,13 +333,13 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
 		sprintf(buf, "-------------------------------------------------");
 		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 
-		sprintf(buf, " \x02 [1TAP] \x01 Foloseste comanda \x06knife <name> \x01in CONSOLA!");
+		sprintf(buf, " \x02 [BroSena] \x01 Use command \x06 knife <name> \x01 in CONSOLE!");
 		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 
-		sprintf(buf, " \x02[1TAP] \x01Variantele de nume acceptate sunt \x06karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
+		sprintf(buf, " \x02 [BroSena] \x01 Accepted name variants are \x06 karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival , nomad!");
 		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 
-		sprintf(buf, " \x02 [1TAP] \x01 Mai multe detalii pe \x06 discord.gg/1tap!");
+		sprintf(buf, " \x02 [BroSena] \x01 More details on \x06 discord.com/invite/DQczE86!");
 		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 
 		sprintf(buf, "-------------------------------------------------");
