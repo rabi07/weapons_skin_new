@@ -45,17 +45,21 @@ typedef struct SkinParm
 typedef void*(FASTCALL* EntityRemove_t)(CGameEntitySystem*, void*, void*,uint64_t);
 typedef void(FASTCALL* GiveNamedItem_t)(void* itemService,const char* pchName, void* iSubType,void* pScriptItem, void* a5,void* a6);
 typedef void(FASTCALL* UTIL_ClientPrintAll_t)(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4);
+typedef void(FASTCALL *ClientPrint)(CBasePlayerController *player, int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4);
 
 extern EntityRemove_t FnEntityRemove;
 extern GiveNamedItem_t FnGiveNamedItem;
 extern UTIL_ClientPrintAll_t FnUTIL_ClientPrintAll;
+extern ClientPrint_t FnUTIL_ClientPrint;
 EntityRemove_t FnEntityRemove;
 GiveNamedItem_t FnGiveNamedItem;
 UTIL_ClientPrintAll_t FnUTIL_ClientPrintAll;
+ClientPrint_t FnUTIL_ClientPrint;
 #else
 void (*FnEntityRemove)(CGameEntitySystem*, void*, void*,uint64_t) = nullptr;
 void (*FnGiveNamedItem)(void* itemService,const char* pchName, void* iSubType,void* pScriptItem, void* a5,void* a6) = nullptr;
 void (*FnUTIL_ClientPrintAll)(int msg_dest, const char* msg_name, const char* param1, const char* param2, const char* param3, const char* param4) = nullptr;
+void(*FnUTIL_ClientPrint)(CBasePlayerController *player, int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4);
 #endif
 
 std::map<int, std::string> g_WeaponsMap;
@@ -176,6 +180,7 @@ void Skin::StartupServer(const GameSessionConfiguration_t& config, ISource2World
 	#else
 	CModule libserver(g_pSource2Server);
 	FnUTIL_ClientPrintAll = libserver.FindPatternSIMD("55 48 89 E5 41 57 49 89 D7 41 56 49 89 F6 41 55 41 89 FD").RCast< decltype(FnUTIL_ClientPrintAll) >();
+	FnUTIL_ClientPrint = libserver.FindPatternSIMD("55 48 89 E5 41 57 49 89 CF 41 56 49 89 D6 41 55 41 89 F5 41 54 4C 8D A5 A0 FE FF FF").RCast<decltype(FnUTIL_ClientPrint)>();
 	FnGiveNamedItem = libserver.FindPatternSIMD("55 48 89 E5 41 57 41 56 49 89 CE 41 55 49 89 F5 41 54 49 89 D4 53 48 89").RCast<decltype(FnGiveNamedItem)>();
 	FnEntityRemove = libserver.FindPatternSIMD("48 85 F6 74 0B 48 8B 76 10 E9 B2 FE FF FF").RCast<decltype(FnEntityRemove)>();
 	#endif
@@ -255,6 +260,64 @@ void CEntityListener::OnEntitySpawned(CEntityInstance* pEntity)
 	});
 }
 
+CON_COMMAND_F(skin, "Give Skin", FCVAR_CLIENT_CAN_EXECUTE)
+{
+    if (context.GetPlayerSlot() == -1) return;
+    CCSPlayerController* pPlayerController = (CCSPlayerController*)g_pEntitySystem->GetBaseEntity((CEntityIndex)(context.GetPlayerSlot().Get() + 1));
+    CCSPlayerPawnBase* pPlayerPawn = pPlayerController->m_hPlayerPawn();
+    if (!pPlayerPawn || pPlayerPawn->m_lifeState() != LIFE_ALIVE)
+        return;
+    char buf[255] = { 0 };
+    if (args.ArgC() != 2 && args.ArgC() != 4)
+    {
+		sprintf(buf, "-------------------------------------------------");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02 [1TAP] \x01 Foloseste comanda \x06skin <skin_id> \x01in CONSOLA!");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02[1TAP] \x01 Pentru a gasi \x06skin_id \x01poti folosi site-ul \x06 csgostash.com !");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02 [1TAP] \x01 Mai multe detalii pe \x06 discord.gg/1tap!");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, "-------------------------------------------------");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+        return;
+    }
+
+    CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
+
+    int64_t steamid = pPlayerController->m_steamID();
+    int64_t weaponId = pWeaponServices->m_hActiveWeapon()->m_AttributeManager().m_Item().m_iItemDefinitionIndex();
+
+    auto weapon_name = g_WeaponsMap.find(weaponId);
+    if (weapon_name == g_WeaponsMap.end()) return;
+
+    g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit = atoi(args.Arg(1));
+    if (args.ArgC() == 4)
+    {
+        g_PlayerSkins[steamid][weaponId].m_nFallbackSeed = atoi(args.Arg(2));
+        g_PlayerSkins[steamid][weaponId].m_flFallbackWear = atof(args.Arg(3));
+    }
+    else
+    {
+        g_PlayerSkins[steamid][weaponId].m_nFallbackSeed = 0;
+        g_PlayerSkins[steamid][weaponId].m_flFallbackWear = 0.0f;
+    }
+
+    CBasePlayerWeapon* pPlayerWeapon = pWeaponServices->m_hActiveWeapon();
+
+    pWeaponServices->RemoveWeapon(pPlayerWeapon);
+    FnEntityRemove(g_pGameEntitySystem, pPlayerWeapon, nullptr, -1);
+    FnGiveNamedItem(pPlayerPawn->m_pItemServices(), weapon_name->second.c_str(), nullptr, nullptr, nullptr, nullptr);
+    pPlayerWeapon->m_AttributeManager().m_Item().m_iAccountID() = 271098320;
+
+    META_CONPRINTF("called by %lld\n", steamid);
+    sprintf(buf, " \7[1TAP]\1  \x04 %s Si-a ales skinul cu ID-ul: %d cu succes!", pPlayerController->m_iszPlayerName(), g_PlayerSkins[steamid][weaponId].m_nFallbackPaintKit);
+    FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+}
 
 CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
 {
@@ -266,22 +329,40 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     char buf[255] = { 0 };
     if (args.ArgC() != 2)
     {
-        sprintf(buf, " \x04 %s You need to specify a knife type to use the giveknife command!", pPlayerController->m_iszPlayerName());
-        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, "-------------------------------------------------");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02 [1TAP] \x01 Foloseste comanda \x06knife <name> \x01in CONSOLA!");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02[1TAP] \x01Variantele de nume acceptate sunt \x06karambit, bayonet, css, m9, bowie, butterfly, flip, push, huntsman, falchion, gut, ursus, navaja, stiletto, talon, paracord, survival, nomad !");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, " \x02 [1TAP] \x01 Mai multe detalii pe \x06 discord.gg/1tap!");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
+
+		sprintf(buf, "-------------------------------------------------");
+		FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
+	
+
     CPlayer_WeaponServices* pWeaponServices = pPlayerPawn->m_pWeaponServices();
-    CBasePlayerWeapon* pPlayerWeapon = pWeaponServices->m_hActiveWeapon();
+    // Get the weapon currently in the player's hand
+	CBasePlayerWeapon* pCurrentWeapon = pWeaponServices->m_hActiveWeapon();
 
-    int64_t steamid = pPlayerController->m_steamID();
+	// Check if the player is currently holding a knife
+	// Check if the player is currently holding a knife
+	if (pCurrentWeapon && strstr(pCurrentWeapon->GetClassname(), "weapon_knife") != nullptr)
+	{
+		// Remove the player's current knife
+		pWeaponServices->RemoveWeapon(pCurrentWeapon);
 
-    // Remove the player's current knife
-    if (pPlayerWeapon && strstr(pPlayerWeapon->GetClassname(), "weapon_knife") != nullptr)
-    {
-        pWeaponServices->RemoveWeapon(pPlayerWeapon);
-        FnEntityRemove(g_pGameEntitySystem, pPlayerWeapon, nullptr, -1);
-    }
+		// Delete the knife entity
+		FnEntityRemove(g_pGameEntitySystem, pCurrentWeapon, nullptr, -1);
+	}
 
     // Give the player the knife
     if (strcmp(args.Arg(1), "m9") == 0)
@@ -367,12 +448,12 @@ CON_COMMAND_F(knife, "Gives the player a knife", FCVAR_CLIENT_CAN_EXECUTE)
     else
     {
         sprintf(buf, " \x04 %s Invalid knife type specified!", pPlayerController->m_iszPlayerName());
-        FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+        FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
         return;
     }
 
     sprintf(buf, " \x04 %s has been given a %s knife!", pPlayerController->m_iszPlayerName(), args.Arg(1));
-    FnUTIL_ClientPrintAll(3, buf, nullptr, nullptr, nullptr, nullptr);
+    FnUTIL_ClientPrint(pPlayerController, 3, buf, nullptr, nullptr, nullptr, nullptr);
 }
 
 CON_COMMAND_F(skin, "Modify skin", FCVAR_CLIENT_CAN_EXECUTE)
